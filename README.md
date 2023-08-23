@@ -4,7 +4,7 @@ A clone repo of nano-gpt with personalized touch
 ## Docker Dev Environment
 to run code inside docker dev environment, first build docker image <br>
 ```make build-torch-image``` <br>
-next, run docker by mounting this directory into it and getting access via bash
+next, run docker by mounting this directory into it and getting access via bash <br>
 ```run-my-torch ```
 
 
