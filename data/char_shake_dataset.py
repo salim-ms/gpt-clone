@@ -38,7 +38,7 @@ class CharShakeDataset:
         return torch.tensor([self.char_to_index[ch] for ch in text], dtype=torch.long)
         
     def decode(self, indices: torch.Tensor):
-        return [self.index_to_char[idx] for idx in indices.tolist()]
+        return "".join([self.index_to_char[idx] for idx in indices.tolist()])
 
     def get_batch(self, split: str, batch_size=4, context_length=8):
         dataset = self.train_data if split == "train" else self.eval_data
