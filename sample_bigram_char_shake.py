@@ -18,7 +18,7 @@ if __name__ == "__main__":
     
     # load trained model
     bigram_model.load_state_dict(torch.load(BIGRAM_MODEL_PATH))
-    
+    bigram_model.eval()
     # shake_text = bigram_model.generate(idx=torch.zeros((1,1), dtype=torch.long), max_new_tokens=200)[0]
     # print(shake_dataset.decode(shake_text))
     

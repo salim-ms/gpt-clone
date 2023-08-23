@@ -13,3 +13,10 @@ next, run docker by mounting this directory into it and getting access via bash 
 to download the shakespeare data from inside docker <br>
 ```./data/download_shakespeare.sh``` <br> 
 you may need to chmod the file
+
+
+# train bigram
+```python train_bigram_char_shake.py```
+
+# sample bigram model
+```python sample_bigram_char_shake.py```
