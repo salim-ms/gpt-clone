@@ -15,6 +15,7 @@ class CharShakeDataset:
         # generate vocab
         self.vocab = sorted(list(set(text)))
         assert len(self.vocab) == 65
+        self.vocab_size = len(self.vocab)
         # generate mappings from char to index
         self.char_to_index = {ch:index for index, ch in enumerate(self.vocab)}
         # generate mappings from index to char

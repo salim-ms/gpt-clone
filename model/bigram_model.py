@@ -7,6 +7,7 @@ class BigramModel(nn.Module):
     def __init__(self, vocab_size):
         super().__init__()
         # create layers
+        self.vocab_size = vocab_size
         self.embedding_layer = nn.Embedding(vocab_size, vocab_size)
         self.loss_fn = nn.CrossEntropyLoss()
     
@@ -15,6 +16,9 @@ class BigramModel(nn.Module):
         if y_targets is None:
             loss = None
         else:
+            """ the thing to remmeber is that in transformers, each time step is a prediction of its own.
+            hence we flattent the logits and the targets, it's a classification problem one token to another.
+            """
             # given that the model is bigram and our inputs of shape B T "time sequence"
             # we need to flatten it
             # reshape logits to B*T, vocab_size
@@ -26,7 +30,10 @@ class BigramModel(nn.Module):
         return logits, loss
         
         
-    def generate(self, idx, max_new_tokens=100):
+    def generate(self, max_new_tokens=100, idx=None):
+        # if starting token not provided, generate one at random based on 65 vocab size
+        if not idx:
+            idx=torch.randint(low=0,high=self.vocab_size, size=(1,1), dtype=torch.long)
         # idx is (B, T) array of indices in the current context
         for _ in range(max_new_tokens):
             # get the predictions

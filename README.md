@@ -16,7 +16,7 @@ you may need to chmod the file
 
 
 # train bigram
-```python train_bigram_char_shake.py```
+```python train.py --config=bigram.ini```
 
 # sample bigram model
-```python sample_bigram_char_shake.py```
+```python sample.py --config=bigram.ini --max_tokens=500```
