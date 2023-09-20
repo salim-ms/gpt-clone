@@ -13,7 +13,6 @@ class MyLayerNorm(nn.Module):
 
         
     def forward(self, x):
-        print("hello norm")
         # compute mean
         x_mean = x.mean(dim=-1, keepdim=True)
         # compute variance
