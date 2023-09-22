@@ -4,8 +4,12 @@ from torch.nn import functional as F
 import argparse
 from utils.config_parser import parse_config
 from helper import parse_dataset_config, parse_model_config
+import random
+import time
 
-# torch.manual_seed(1337)
+# randomize seed
+random.seed(time.process_time())
+torch.manual_seed(random.randint(0, 1e5))
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 parser = argparse.ArgumentParser()
@@ -31,5 +35,6 @@ if __name__ == "__main__":
     m_model.eval()
     m_model = m_model.to(device)
     
-    generated_text = m_model.generate(max_new_tokens=int(args.max_tokens))[0]
+    idx=torch.randint(low=0,high=m_dataset.vocab_size, size=(1,1), dtype=torch.long, device=device)
+    generated_text = m_model.generate(max_new_tokens=int(args.max_tokens), idx=idx)[0]
     print(m_dataset.decode(generated_text))
