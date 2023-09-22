@@ -1,6 +1,7 @@
 import configparser
 from data.char_shake_dataset import CharShakeDataset
 from model.bigram_model import BigramModel
+from model.baby_gpt_model import BabyGPT
 import os, errno
 
 
@@ -22,6 +23,8 @@ def parse_model_config(config: configparser.ConfigParser, vocab_size: int):
     
     if model_type == "bigram":
         model = BigramModel(vocab_size=vocab_size)
+    elif model_type == "baby_gpt":
+        model = BabyGPT(config=config, vocab_size=vocab_size)
     else:
         raise Exception("Cannot Parse Config")
     return model

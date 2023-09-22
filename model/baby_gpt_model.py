@@ -7,15 +7,14 @@ from model.layers.layer_norm import MyLayerNorm
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class BabyGPT(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, vocab_size):
         super(BabyGPT, self).__init__()
         
         # configs
-        embed_size = config["Model"]["embed_size"]
-        n_layers = config["Model"]["n_layers"]
-        vocab_size = config["Dataset"]["vocab_size"]
-        sequence_length = config["Model"]["sequence_length"]
-        n_heads = config["Model"]["n_heads"]
+        embed_size = config["Model"].getint("embed_size")
+        n_layers = config["Model"].getint("n_layers")
+        sequence_length = config["Model"].getint("sequence_length")
+        n_heads = config["Model"].getint("n_heads")
         
         # 2 embedding layers token + positional
         self.token_embedding = nn.Embedding(vocab_size, embed_size)
@@ -61,6 +60,25 @@ class BabyGPT(nn.Module):
             
         return logits, loss
         
+    
+    def generate(self, max_new_tokens=100, idx=None):
+        # if starting token not provided, generate one at random based on 65 vocab size
+        if not idx:
+            idx=torch.randint(low=0,high=self.vocab_size, size=(1,1), dtype=torch.long)
+        # idx is (B, T) array of indices in the current context
+        for _ in range(max_new_tokens):
+            # get the predictions
+            logits, loss = self(idx)
+            # focus only on the last time step
+            logits = logits[:, -1, :] # becomes (B, C)
+            # apply softmax to get probabilities
+            probs = F.softmax(logits, dim=-1) # (B, C)
+            # sample from the distribution
+            idx_next = torch.multinomial(probs, num_samples=1) # (B, 1)
+            # append sampled index to the running sequence
+            idx = torch.cat((idx, idx_next), dim=1) # (B, T+1)
+        return idx
+    
         
 
 if __name__ == "__main__":
@@ -83,7 +101,7 @@ if __name__ == "__main__":
                 "vocab_size": 65,
             }
     }
-    baby_gpt = BabyGPT(config=config)
+    baby_gpt = BabyGPT(config=config, vocab_size=65)
     baby_gpt = baby_gpt.to(device)
     # call with loss
     y, loss = baby_gpt(x, x)

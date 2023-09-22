@@ -14,9 +14,17 @@ to download the shakespeare data from inside docker <br>
 ```./data/download_shakespeare.sh``` <br> 
 you may need to chmod the file
 
+##### Saved Models will be stored under model_outputs/<model name>/model_saved.pth
+
 
 # train bigram
 ```python train.py --config=bigram.ini```
 
 # sample bigram model
 ```python sample.py --config=bigram.ini --max_tokens=500```
+
+
+# train baby gpt with Shakespeare and char level
+```python train.py --config=baby_gpt_char.ini```
+# sample baby gpt
+```python sample.py --config=baby_gpt_char.ini --max_tokens=500```

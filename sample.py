@@ -19,7 +19,7 @@ if __name__ == "__main__":
     config = parse_config(args.config)
     
     BATCH_SIZE = config["Model"].getint("batch_size")
-    CONTEXT_LENGTH= config["Model"].getint("context_length")
+    SEQUENCE_LENGTH= config["Model"].getint("sequence_length")
     
     # parse and load
     m_dataset = parse_dataset_config(config)
