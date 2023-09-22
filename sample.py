@@ -5,7 +5,8 @@ import argparse
 from utils.config_parser import parse_config
 from helper import parse_dataset_config, parse_model_config
 
-torch.manual_seed(1337)
+# torch.manual_seed(1337)
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", required=True, help="config name only, can be found under configurations/")
@@ -28,6 +29,7 @@ if __name__ == "__main__":
     # load trained model
     m_model.load_state_dict(torch.load(RESTORED_MODEL_PATH))
     m_model.eval()
+    m_model = m_model.to(device)
     
     generated_text = m_model.generate(max_new_tokens=int(args.max_tokens))[0]
     print(m_dataset.decode(generated_text))

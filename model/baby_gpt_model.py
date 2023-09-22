@@ -10,17 +10,18 @@ class BabyGPT(nn.Module):
     def __init__(self, config, vocab_size):
         super(BabyGPT, self).__init__()
         
+        self.vocab_size = vocab_size
         # configs
         embed_size = config["Model"].getint("embed_size")
         n_layers = config["Model"].getint("n_layers")
-        sequence_length = config["Model"].getint("sequence_length")
+        self.sequence_length = config["Model"].getint("sequence_length")
         n_heads = config["Model"].getint("n_heads")
         
         # 2 embedding layers token + positional
         self.token_embedding = nn.Embedding(vocab_size, embed_size)
-        self.positional_embedding = nn.Embedding(sequence_length, embed_size)
+        self.positional_embedding = nn.Embedding(self.sequence_length, embed_size)
         # attention blocks for n_layers
-        self.layers = nn.Sequential(*[SelfAttentionBlock(embed_size=embed_size, n_heads=n_heads, sequence_length=sequence_length) for _ in range(n_layers)])
+        self.layers = nn.Sequential(*[SelfAttentionBlock(embed_size=embed_size, n_heads=n_heads, sequence_length=self.sequence_length) for _ in range(n_layers)])
         # layer norm
         self.layer_norm = MyLayerNorm(dim_size=embed_size) 
         # linear layer head
@@ -62,13 +63,15 @@ class BabyGPT(nn.Module):
         
     
     def generate(self, max_new_tokens=100, idx=None):
-        # if starting token not provided, generate one at random based on 65 vocab size
+        # if starting token not provided, generate one at random based on vocab size
         if not idx:
-            idx=torch.randint(low=0,high=self.vocab_size, size=(1,1), dtype=torch.long)
+            idx=torch.randint(low=0,high=self.vocab_size, size=(1,1), dtype=torch.long, device=device)
         # idx is (B, T) array of indices in the current context
         for _ in range(max_new_tokens):
+            # crop idx to the last supported sequence length tokens
+            idx_cond = idx[:, -self.sequence_length:]
             # get the predictions
-            logits, loss = self(idx)
+            logits, loss = self(idx_cond)
             # focus only on the last time step
             logits = logits[:, -1, :] # becomes (B, C)
             # apply softmax to get probabilities
