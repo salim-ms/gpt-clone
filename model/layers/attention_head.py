@@ -15,7 +15,7 @@ class MyAttentionHead(nn.Module):
         self.register_buffer("masking", torch.tril(torch.ones(sequence_length, sequence_length)))
         # dropout
         self.dropout = nn.Dropout(dropout)
-        pass
+        
     
     def forward(self, x):
         
@@ -35,7 +35,7 @@ class MyAttentionHead(nn.Module):
         weights = weights / torch.sqrt(torch.tensor(C)) 
         # apply softmax
         soft_weights = F.softmax(weights, dim=-1) # apply on last dimension B, T, T
-        print(f"softmax weights {soft_weights}")
+        # print(f"softmax weights {soft_weights}")
         soft_weights = self.dropout(soft_weights)
         # multiply softmax (B, T, T) by values (B, T, C) -> B, T, C
         res = soft_weights @ value

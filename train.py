@@ -59,6 +59,10 @@ if __name__ == "__main__":
     # create an optimizer
     optimizer = torch.optim.AdamW(m_model.parameters(), lr=1e-3)
     
+    # output total number of parameters
+    trainable_parameters = sum(p.numel() for p in m_model.parameters()) / 1e6
+    print(f"{trainable_parameters} M Parameters")
+    
     # training loop
     running_loss = 0
     for i in range(TRAINING_STEPS):

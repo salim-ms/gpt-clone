@@ -17,6 +17,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 RUN chown -R $USERNAME:$USER_GID /workspace
 
+RUN export PYTHONPATH=/workspace
+
 USER $USERNAME
 
 
