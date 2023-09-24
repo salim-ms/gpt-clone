@@ -42,14 +42,14 @@ class CharShakeDataset:
     def decode(self, indices: torch.Tensor):
         return "".join([self.index_to_char[idx] for idx in indices.tolist()])
 
-    def get_batch(self, split: str, batch_size=4, sequence_length=8):
+    def get_batch(self, split: str, batch_size=4, max_context_length=8):
         dataset = self.train_data if split == "train" else self.eval_data
         # generate batch-size random indices 
-        rand_indices = torch.randint(len(dataset) - sequence_length, (batch_size,))
+        rand_indices = torch.randint(len(dataset) - max_context_length, (batch_size,))
        
-        x = torch.stack([dataset[rand_idx:rand_idx+sequence_length] for rand_idx in rand_indices])
+        x = torch.stack([dataset[rand_idx:rand_idx+max_context_length] for rand_idx in rand_indices])
         # target y are shifted by 1
-        y = torch.stack([dataset[rand_idx+1:rand_idx+sequence_length+1] for rand_idx in rand_indices])
+        y = torch.stack([dataset[rand_idx+1:rand_idx+max_context_length+1] for rand_idx in rand_indices])
         x = x.to(device)
         y = y.to(device)
         return x, y
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print(train_dataset[:100])    
     print(shake_dataset.decode(train_dataset[:100]))
     
-    x, y = shake_dataset.get_batch(split="train", batch_size=4, sequence_length=8)
+    x, y = shake_dataset.get_batch(split="train", batch_size=4, max_context_length=8)
     print(x)
     print(y)
     print(x.shape)

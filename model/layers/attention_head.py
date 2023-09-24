@@ -5,14 +5,14 @@ import torch.nn.functional as F
 torch.manual_seed(1337)
 
 class MyAttentionHead(nn.Module):
-    def __init__(self, embed_size, head_size, sequence_length, dropout=0.1):
+    def __init__(self, embed_size, head_size, max_context_length, dropout=0.1):
         super(MyAttentionHead, self).__init__()
         # keys, values, queries 
         self.key = nn.Linear(embed_size, head_size, bias=False)
         self.value = nn.Linear(embed_size, head_size, bias=False)
         self.query = nn.Linear(embed_size, head_size, bias=False)
         # masking matrix
-        self.register_buffer("masking", torch.tril(torch.ones(sequence_length, sequence_length)))
+        self.register_buffer("masking", torch.tril(torch.ones(max_context_length, max_context_length)))
         # dropout
         self.dropout = nn.Dropout(dropout)
         
@@ -87,8 +87,8 @@ if __name__ == "__main__":
     print(T)
     head_size = int(math.sqrt(C))
     print(head_size)
-    m_head_attention = MyAttentionHead(embed_size=C, head_size=head_size, sequence_length=T, dropout=0.0)
-    m_head_attention2 = MyAttentionHead(embed_size=C, head_size=head_size, sequence_length=T, dropout=0.0)
+    m_head_attention = MyAttentionHead(embed_size=C, head_size=head_size, max_context_length=T, dropout=0.0)
+    m_head_attention2 = MyAttentionHead(embed_size=C, head_size=head_size, max_context_length=T, dropout=0.0)
     
     res = m_head_attention(x) # output B, T, head_size=4
     res2 = m_head_attention2(x)

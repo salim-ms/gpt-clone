@@ -14,14 +14,14 @@ class BabyGPT(nn.Module):
         # configs
         embed_size = config["Model"].getint("embed_size")
         n_layers = config["Model"].getint("n_layers")
-        self.sequence_length = config["Model"].getint("sequence_length")
+        self.max_context_length = config["Model"].getint("max_context_length")
         n_heads = config["Model"].getint("n_heads")
         
         # 2 embedding layers token + positional
         self.token_embedding = nn.Embedding(vocab_size, embed_size)
-        self.positional_embedding = nn.Embedding(self.sequence_length, embed_size)
+        self.positional_embedding = nn.Embedding(self.max_context_length, embed_size)
         # attention blocks for n_layers
-        self.layers = nn.Sequential(*[SelfAttentionBlock(embed_size=embed_size, n_heads=n_heads, sequence_length=self.sequence_length) for _ in range(n_layers)])
+        self.layers = nn.Sequential(*[SelfAttentionBlock(embed_size=embed_size, n_heads=n_heads, max_context_length=self.max_context_length) for _ in range(n_layers)])
         # layer norm
         self.layer_norm = MyLayerNorm(dim_size=embed_size) 
         # linear layer head
@@ -69,7 +69,7 @@ class BabyGPT(nn.Module):
         # idx is (B, T) array of indices in the current context
         for _ in range(max_new_tokens):
             # crop idx to the last supported sequence length tokens
-            idx_cond = idx[:, -self.sequence_length:]
+            idx_cond = idx[:, -self.max_context_length:]
             # get the predictions
             logits, loss = self(idx_cond)
             # focus only on the last time step
@@ -96,7 +96,7 @@ if __name__ == "__main__":
             {
                 "embed_size": 16,
                 "n_layers": 2,
-                "sequence_length": 8,
+                "max_context_length": 8,
                 "n_heads": 4
             },
         "Dataset":

@@ -20,7 +20,7 @@ MODEL_SAVED_PATH = "model_saved.pth"
 
 # esitmate loss during training based on training and eval loss
 @torch.no_grad()
-def estimate_loss(model, dataset, batch_size, sequence_length, eval_iterations):
+def estimate_loss(model, dataset, batch_size, max_context_length, eval_iterations):
     out = {}
     # entry eval model
     model.eval()
@@ -30,7 +30,7 @@ def estimate_loss(model, dataset, batch_size, sequence_length, eval_iterations):
         losses = torch.zeros(eval_iterations)
         for i in range(eval_iterations):
             # get data
-            x, y = dataset.get_batch(split, batch_size, sequence_length)
+            x, y = dataset.get_batch(split, batch_size, max_context_length)
             logits, loss = model(x, y)
             losses[i] = loss.item()
         
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     config = parse_config(args.config)
     
     BATCH_SIZE = config["Model"].getint("batch_size")
-    SEQUENCE_LENGTH= config["Model"].getint("sequence_length")
+    MAX_CONTEXT_LENGTH= config["Model"].getint("max_context_length")
     
     TRAINING_STEPS = config["Training"].getint("training_steps")
     EVAL_ITERATIONS = config["Training"].getint("eval_iterations")
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     running_loss = 0
     for i in range(TRAINING_STEPS):
         # get training data batch
-        x, y = m_dataset.get_batch(split="train", batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
+        x, y = m_dataset.get_batch(split="train", batch_size=BATCH_SIZE, max_context_length=MAX_CONTEXT_LENGTH)
         # forward
         logits, loss = m_model(x, y)
         # set optimizer grad to 0
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             running_loss = 0
 
         if i % 200 == 199:
-            estimate_loss(m_model, m_dataset, BATCH_SIZE, SEQUENCE_LENGTH, EVAL_ITERATIONS)
+            estimate_loss(m_model, m_dataset, BATCH_SIZE, MAX_CONTEXT_LENGTH, EVAL_ITERATIONS)
         
     # save model
     model_directory_path = f'/workspace/model_outputs/{config["Model"]["model_type"]}'

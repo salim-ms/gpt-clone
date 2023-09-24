@@ -24,7 +24,7 @@ if __name__ == "__main__":
     config = parse_config(args.config)
     
     BATCH_SIZE = config["Model"].getint("batch_size")
-    SEQUENCE_LENGTH= config["Model"].getint("sequence_length")
+    MAX_CONTEXT_LENGTH= config["Model"].getint("max_context_length")
     
     # parse and load
     m_dataset = parse_dataset_config(config)
