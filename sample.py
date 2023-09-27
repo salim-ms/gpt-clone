@@ -14,6 +14,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", required=True, help="config name only, can be found under configurations/")
+parser.add_argument("--prompt", required=False, help="prompt to start generation from")
 parser.add_argument("--max_tokens", default=200, required=False, help="number of tokens to generate")
 
 
@@ -35,6 +36,16 @@ if __name__ == "__main__":
     m_model.eval()
     m_model = m_model.to(device)
     
-    idx=torch.randint(low=0,high=m_dataset.vocab_size, size=(1,1), dtype=torch.long, device=device)
+    if str(args.prompt):
+        # convert prompt to token ids
+        idx = m_dataset.encode(args.prompt)
+        # move to device
+        idx = idx.to(device)
+        # add batch dimensions
+        idx = idx.unsqueeze(0) # batch, token-ids
+        
+    else:
+        # generate random ids
+        idx=torch.randint(low=0,high=m_dataset.vocab_size, size=(1,1), dtype=torch.long, device=device)
     generated_text = m_model.generate(max_new_tokens=int(args.max_tokens), idx=idx)[0]
     print(m_dataset.decode(generated_text))

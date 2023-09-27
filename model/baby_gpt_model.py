@@ -64,7 +64,7 @@ class BabyGPT(nn.Module):
     
     def generate(self, max_new_tokens=100, idx=None):
         # if starting token not provided, generate one at random based on vocab size
-        if not idx:
+        if idx is None:
             idx=torch.randint(low=0,high=self.vocab_size, size=(1,1), dtype=torch.long, device=device)
         # idx is (B, T) array of indices in the current context
         for _ in range(max_new_tokens):
