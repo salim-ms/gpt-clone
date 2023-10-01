@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 import argparse
 from utils.config_parser import parse_config
-from helper import parse_dataset_config, parse_model_config
+from gpt_parser import parse_dataset_config, parse_model_config
 import random
 import time
 
@@ -14,7 +14,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", required=True, help="config name only, can be found under configurations/")
-parser.add_argument("--prompt", required=False, help="prompt to start generation from")
+parser.add_argument("--prompt", default="", required=False, help="prompt to start generation from")
 parser.add_argument("--max_tokens", default=200, required=False, help="number of tokens to generate")
 
 
@@ -30,7 +30,8 @@ if __name__ == "__main__":
     # parse and load
     m_dataset = parse_dataset_config(config)
     m_model = parse_model_config(config, m_dataset.vocab_size)
-    RESTORED_MODEL_PATH = f'/workspace/model_outputs/{config["Model"]["model_type"]}/{MODEL_SAVED_PATH}'
+    model_name = f'{config["Model"]["model_type"]}_{config["Dataset"]["dataset_name"]}_{config["Tokenizer"]["tokenizer_type"]}'
+    RESTORED_MODEL_PATH = f'/workspace/model_outputs/{model_name}/{MODEL_SAVED_PATH}'
     # load trained model
     m_model.load_state_dict(torch.load(RESTORED_MODEL_PATH))
     m_model.eval()

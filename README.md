@@ -28,3 +28,54 @@ you may need to chmod the file
 ```python train.py --config=baby_gpt_char.ini```
 # sample baby gpt
 ```python sample.py --config=baby_gpt_char.ini --max_tokens=500```
+
+## Token Based Baby GPT
+```
+to train
+python train.py --config=baby_gpt_tokens.ini
+to sample
+python sample.py --config=baby_gpt_tokens.ini
+
+```
+
+Output sample
+```
+eria ing i' the general dishonour of peace 
+ much chest Whereto, his name summer store. 
+ 
+ ROMEO: 
+ Go, he, more than robs my Corioli is from all pieces. 
+ 
+ JULIET: 
+ What day defect ; until what's thee? 
+ He is not on him to death's gentle Hastings speak: 
+ The royalties of all able to the moon, 
+ And watch'd such contempt, he's rid but near up me. 
+ 
+ YORK: 
+ And never so, it must become the common bastard kind, 
+ Take her more heavier. 
+ 
+ DERBY: 
+ And, sir, he's mother, will, good they have gi' councils 
+ And stolen are sure my mind for lost; 
+ Methinks I will go turn now. 
+ 
+ SICINIUS: 
+ Thanks, noble brother? 
+ 
+ SICINIUS: 
+ Thou willingness Far school-maids prince and lie along? 
+ 
+ Lord: 
+ Be singly withal: Therefore be, the succor and for 
+ doit. Well, what boy? 
+ 
+ PAULINA: 
+ By any that 
+ That usurp'd: snow Our cheerful prancing to committed you thanks. 
+ But thou canst draw thee for him, I love 
+ Have I, to do not time how to her husband, 
+ That will
+
+```

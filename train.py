@@ -3,7 +3,8 @@ import torch.nn as nn
 from torch.nn import functional as F
 import argparse
 from utils.config_parser import parse_config
-from helper import parse_dataset_config, parse_model_config, create_directory
+from gpt_parser import parse_dataset_config, parse_model_config
+from utils.config_parser import create_directory
 
 
 torch.manual_seed(1337)
@@ -97,7 +98,8 @@ if __name__ == "__main__":
             estimate_loss(m_model, m_dataset, BATCH_SIZE, MAX_CONTEXT_LENGTH, EVAL_ITERATIONS)
         
     # save model
-    model_directory_path = f'/workspace/model_outputs/{config["Model"]["model_type"]}'
+    model_name = f'{config["Model"]["model_type"]}_{config["Dataset"]["dataset_name"]}_{config["Tokenizer"]["tokenizer_type"]}'
+    model_directory_path = f'/workspace/model_outputs/{model_name}'
     create_directory(model_directory_path)
-    trained_model_path = f'/workspace/model_outputs/{config["Model"]["model_type"]}/{MODEL_SAVED_PATH}'
+    trained_model_path = f'/workspace/model_outputs/{model_name}/{MODEL_SAVED_PATH}'
     torch.save(m_model.state_dict(), trained_model_path)

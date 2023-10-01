@@ -3,3 +3,4 @@ data/input.txt
 *.pth
 
 model_outputs/*
+data_outputs/*

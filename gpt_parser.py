@@ -1,5 +1,6 @@
 import configparser
 from data.char_shake_dataset import CharShakeDataset
+from data.tokens_shake_dataset import TokenShakeDataset
 from model.bigram_model import BigramModel
 from model.baby_gpt_model import BabyGPT
 import os, errno
@@ -13,6 +14,8 @@ def parse_dataset_config(config: configparser.ConfigParser):
     
     if str(dataset_name).strip() == "shakespeare" and str(tokenizer_type).strip() == "char":
         m_dataset = CharShakeDataset(path_to_file="./data/input.txt")
+    elif str(dataset_name).strip() == "shakespeare" and str(tokenizer_type).strip() == "token":
+        m_dataset = TokenShakeDataset(path_to_file="./data/input.txt")
     else:
         raise Exception("Cannot Parse Config")
     return m_dataset
@@ -29,10 +32,3 @@ def parse_model_config(config: configparser.ConfigParser, vocab_size: int):
         raise Exception("Cannot Parse Config")
     return model
 
-
-def create_directory(dir_path: str):
-    try:
-        os.makedirs(dir_path)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise

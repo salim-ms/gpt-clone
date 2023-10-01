@@ -1,5 +1,5 @@
 import configparser
-
+import os
 
 def parse_config(file_name: str):
     # append path in docker to file_name if not provided
@@ -8,7 +8,13 @@ def parse_config(file_name: str):
     config = configparser.ConfigParser()
     config.read(file_name)
     return config
-    
+
+
+def create_directory(dir_path: str):
+    try:
+        os.makedirs(dir_path)
+    except FileExistsError:
+        pass
 
 
 if __name__ == "__main__":
