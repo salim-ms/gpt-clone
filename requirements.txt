@@ -5,3 +5,4 @@ datasets
 transformers
 tokenizers
 loguru
+tiktoken
