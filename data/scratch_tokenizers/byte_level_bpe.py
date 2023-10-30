@@ -34,17 +34,43 @@ contractions, words, numbers, symbols/punctuations, and spaces. By applying this
 into a sequence of meaningful tokens, which is a common preprocessing step in natural language processing (NLP).
 
 """
-GPT2_PATTERN = (
-    r"""'s|'t|'re|'ve|'m|'ll|'d| ?[\p{L}]+| ?[\p{N}]+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-)
+
+# with special characters <PAD> and |endoftext|
+# manually adding variations of special tokens to handle space being included in tokens
+# GPT2_PATTERN = (
+#     r"""'s|'t|'re|'ve|'m|'ll|'d|<PAD>| <PAD>|\|endoftext\|| \|endoftext\|| ?[\p{L}]+| ?[\p{N}]+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+# )
+
+# we will use this approach where spaces are encoded separately
+# Pattern to have no spaces for all words
+# GPT2_PATTERN = (
+#     r"""'s|'t|'re|'ve|'m|'ll|'d|<PAD>|\|endoftext\||[\p{L}]+|[\p{N}]+|[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+# )
 
 
 class ByteBPE:
-    def __init__(self) -> None:
+    def __init__(self, special_tokens=None) -> None:
+        
+        
+        if special_tokens:
+            regex_special_tokens = [sp.replace("|", "\|") for sp in special_tokens]
+            regex_special_tokens = "|".join(regex_special_tokens)
+            
+            GPT2_PATTERN = rf"""'s|'t|'re|'ve|'m|'ll|'d|{regex_special_tokens}|[\p{{L}}]+|[\p{{N}}]+|[^\s\p{{L}}\p{{N}}]+|\s+(?!\S)|\s+"""            
+            
+            self.special_tokens = [sp.encode("utf-8") for sp in special_tokens]
+            self.ranks = {sp:idx for idx,sp in enumerate(self.special_tokens) }
+            self.decode_ranks = {v:k for k,v in self.ranks.items()}
+        else:
+            GPT2_PATTERN = r"""'s|'t|'re|'ve|'m|'ll|'d|[\p{L}]+|[\p{N}]+|[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+            self.special_tokens = None
+            self.ranks = {}
+            self.decode_ranks = {}
+                
+            
         self.pattrn = regex.compile(GPT2_PATTERN)
-        self.ranks = {}
         
-        
+
     def train(self, filename: str, vocab_size: int):
         """
         ranks start from all bytes 0:255
@@ -53,20 +79,24 @@ class ByteBPE:
         if vocab_size < 256:
             raise Exception("must be greater than 256, minimum number of possible bytes")
         
-        ranks = {}
+        
+        rank_starter = len(self.ranks)
         for i in range(256):
-            ranks[bytes([i])] = i
+            self.ranks[bytes([i])] = i + rank_starter
         
         with open(filename, 'r') as f:
             text = f.read()
         
         # apply regex to text, get words, then convert each word to list of bytes
-        words = self.pattrn.findall(text)       
+        words = self.pattrn.findall(text)
+        # drop any special tokens found in text
+        if self.special_tokens:
+            words = [word for word in words if word.encode("utf-8") not in self.special_tokens]
+            
         words_bytes = [[bytes([b]) for b in word.encode('utf-8')] for word in words]
         
-        
         # keep iterating until vocab size is reached or no maximum sequences are found
-        while len(ranks) < vocab_size:
+        while len(self.ranks) < vocab_size:
             
             # compute most common pair of sequenced bytes and add it to ranks
             counter = Counter()
@@ -83,7 +113,7 @@ class ByteBPE:
            
             # gen new token based on merge and add it to ranks
             token = most_common_pair[0] + most_common_pair[1]
-            ranks[token] = len(ranks)
+            self.ranks[token] = len(self.ranks)
             
             # merge all pairs based on new token and generate new list of words where pairs are merged
             new_words = []
@@ -110,53 +140,75 @@ class ByteBPE:
             
             # print(words_bytes)        
             
-        self.ranks = ranks
     
-    def inference(self, text: str):
+        self.decode_ranks = {v:k for k,v in self.ranks.items()}
+    
+    def encode(self, text: str):
         """
         # merge pairs sequentially until no more pairs found in ranks
         # pairs with lower ranks must be merged first
         """
         
         words = self.pattrn.findall(text)
-        words_bytes = [[bytes([b]) for b in word.encode("utf-8")] for word in words]
+        words_bytes = []
+        # if a word is special token, add as is to the list
+        for word in words:
+            if self.special_tokens and word.encode("utf-8") in self.special_tokens:
+                words_bytes.append(word.encode("utf-8"))
+            else:
+                words_bytes.append([bytes([b]) for b in word.encode("utf-8")])
+                
         
         final_tokens = []
         for bword in words_bytes:
-            while True:
-                min_idx = None
-                min_rank = None
-                for i, pair in enumerate(zip(bword[:-1], bword[1:])):
-                    rank = self.ranks.get((pair[0] + pair[1]))
-                    if rank is not None and (min_rank is None or rank < min_rank):
-                        min_rank = rank
-                        min_idx = i
+            if self.special_tokens and bword in self.special_tokens:
+                final_tokens.append(bword)
+            else:
+                while True:
+                    min_idx = None
+                    min_rank = None
+                    for i, pair in enumerate(zip(bword[:-1], bword[1:])):
+                        rank = self.ranks.get((pair[0] + pair[1]))
+                        if rank is not None and (min_rank is None or rank < min_rank):
+                            min_rank = rank
+                            min_idx = i
+                        
                     
+                    if min_rank is None:
+                        break
                 
-                if min_rank is None:
-                    break
-            
-                bword = bword[:min_idx] + [bword[min_idx] + bword[min_idx+1]] + bword[min_idx+2:]
-            
-            final_tokens.extend(bword)
+                    bword = bword[:min_idx] + [bword[min_idx] + bword[min_idx+1]] + bword[min_idx+2:]
+                
+                final_tokens.extend(bword)
         
-        return final_tokens
+        ids = [self.ranks[token] for token in final_tokens]
+        return ids
        
+    
+    def decode(self, ids: list[int]) -> list[str]:
+    
+        decoded_tokens = [self.decode_ranks[ide].decode("utf-8") for ide in ids]
+        print(f"decoded tokens {decoded_tokens}")
+        return "".join(decoded_tokens)
     
     
 if __name__ == "__main__":
     filename_text = "data/scratch_tokenizers/hello.txt"
-    b_bpe = ByteBPE()
+    b_bpe = ByteBPE(special_tokens=["<PAD>", "|endoftext|"])
     b_bpe.train(filename=filename_text, vocab_size=300)
     
-    tokens = b_bpe.inference("asd hello worldf")
+    tokens_ids = b_bpe.encode("<PAD> asd hello worldf <PAD> |endoftext|")
+    print(tokens_ids)
+    tokens = b_bpe.decode(tokens_ids)
     print(tokens)
+    
     
     filename_text = "data/scratch_tokenizers/multi_hello.txt"
     b_bpe = ByteBPE()
     b_bpe.train(filename=filename_text, vocab_size=300)
     
-    tokens = b_bpe.inference("مرحبا hello")
+    tokens_ids = b_bpe.encode("مرحبا hello")
+    print(tokens_ids)
+    tokens = b_bpe.decode(tokens_ids)
     print(tokens)
-    
-    
+

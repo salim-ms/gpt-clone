@@ -1,2 +1,2 @@
-hello world
-byte level bpe from hello hello world
+hello world <PAD> 
+byte level bpe from hello hello world |endoftext|
