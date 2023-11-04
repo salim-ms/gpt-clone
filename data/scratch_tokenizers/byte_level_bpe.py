@@ -138,9 +138,6 @@ class ByteBPE:
             
             words_bytes = new_words
             
-            # print(words_bytes)        
-            
-    
         self.decode_ranks = {v:k for k,v in self.ranks.items()}
     
     def encode(self, text: str):
