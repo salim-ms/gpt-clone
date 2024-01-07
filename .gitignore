@@ -4,3 +4,5 @@ data/input.txt
 
 model_outputs/*
 data_outputs/*
+
+*.bin

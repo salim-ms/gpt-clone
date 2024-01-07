@@ -1,0 +1,1 @@
+### Sentence Piece tokenizers 8,16,32,48 k tokenizers trained on arabic 1b dataset via sentencepiece library
