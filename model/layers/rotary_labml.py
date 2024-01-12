@@ -99,12 +99,13 @@ class RotaryEmbeddingLabML(nn.Module):
     
     
 if __name__ == "__main__":
-    x = torch.randn([2, 8, 32], dtype=torch.float16).to(device)
+    # batch, seq, n_heads, d_dim
+    x = torch.randn([2, 8, 5, 32], dtype=torch.float16).to(device)
     print(x.shape)
     
-    # x must be transformed to 4d by adding n_head dimension to third position batch, seq, n_heads, d_dim
-    x = x[:, :, None, :]
-    print(x.shape)
+    # # x must be transformed to 4d by adding n_head dimension to third position batch, seq, n_heads, d_dim
+    # x = x[:, :, None, :]
+    # print(x.shape)
     
     rotay_layer = RotaryEmbeddingLabML(d=x.shape[3])
     
